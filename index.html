@@ -732,14 +732,12 @@
             var abs = data.abstract;
             html += '<div class="card"><div class="card-header">Abstrak Anda</div><div class="card-body">';
             html += '<h5>' + escapeHTML(abs.paper_title) + '</h5>';
-            html += '<p class="text-muted"><i class="fa-solid fa-tag"></i> ' + escapeHTML(abs.topic) + '</p>';
             html += 'Status: <span class="badge bg-primary">' + escapeHTML(abs.status) + '</span>';
             html += '</div></div>';
           } else {
             html += '<div class="card"><div class="card-header bg-primary text-white">Form Submit Abstrak</div><div class="card-body">';
             html += '<form onsubmit="event.preventDefault(); submitAbstract();">';
             html += '<div class="mb-3"><label>Judul Paper</label><input type="text" id="absTitle" class="form-control" required></div>';
-            html += '<div class="mb-3"><label>Topik</label><select id="absTopic" class="form-select"><option value="Technology">Technology</option><option value="Education">Education</option><option value="Science">Science</option></select></div>';
             html += '<div class="mb-3"><label>Isi Abstrak</label><textarea id="absText" class="form-control" rows="5" required></textarea></div>';
             html += '<button type="submit" class="btn btn-primary" id="btnSubmitAbs">Kirim Abstrak</button>';
             html += '</form></div></div>';
@@ -747,13 +745,13 @@
         } else if (currentUser.role === 'Admin') {
           html += '<div class="card"><div class="card-header">Data Abstrak Masuk</div>';
           html += '<div class="card-body table-responsive"><table class="table">';
-          html += '<thead><tr><th>No Reg</th><th>Judul</th><th>Topik</th><th>Status</th></tr></thead><tbody>';
+          html += '<thead><tr><th>No Reg</th><th>Judul</th><th>Status</th></tr></thead><tbody>';
           if(data.list && data.list.length > 0) {
             data.list.forEach(function(a) {
-              html += '<tr><td>' + escapeHTML(a.registration_no) + '</td><td>' + escapeHTML(a.paper_title) + '</td><td>' + escapeHTML(a.topic) + '</td>';
+              html += '<tr><td>' + escapeHTML(a.registration_no) + '</td><td>' + escapeHTML(a.paper_title) + '</td>';
               html += '<td><span class="badge bg-primary">' + escapeHTML(a.status) + '</span></td></tr>';
             });
-          } else html += '<tr><td colspan="4" class="text-center">Belum ada data</td></tr>';
+          } else html += '<tr><td colspan="3" class="text-center">Belum ada data</td></tr>';
           html += '</tbody></table></div></div>';
         }
         document.getElementById('abstractContainer').innerHTML = html;
@@ -764,7 +762,7 @@
         btn.disabled = true; btn.innerHTML = 'Mengirim...';
         var payload = {
           title: document.getElementById('absTitle').value,
-          topic: document.getElementById('absTopic').value,
+          topic: '',
           text: document.getElementById('absText').value
         };
         gasRun('submitAbstract', sessionToken, payload).then(function(res){
