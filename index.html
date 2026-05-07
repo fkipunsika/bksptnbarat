@@ -346,7 +346,7 @@
       }
 
      // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI BAWAH INI
-      const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwvW8KI5xkRvOH8HQlOWfIcTREYzgRaWV28_1-7dcmcqE0w-4xH9Q0B-3kqQA4p88E/exec'; 
+      const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyR3_IKpOaWhIE6nlUShAuWFzmAu-eGL2g1mwmElIRxZf_es1MFBRa5-RLH05edLA/exec'; 
 
       function gasRun(funcName) {
         var args = Array.prototype.slice.call(arguments, 1);
@@ -737,10 +737,10 @@
           } else {
             html += '<div class="card"><div class="card-header bg-primary text-white">Form Submit Abstrak</div><div class="card-body">';
             html += '<form onsubmit="event.preventDefault(); submitAbstract();">';
-            html += '<div class="mb-3"><label>Judul Paper</label><input type="text" id="absTitle" class="form-control" required></div>';
-            html += '<div class="mb-3"><label>Isi Abstrak</label><textarea id="absText" class="form-control" rows="5" required></textarea></div>';
-            html += '<button type="submit" class="btn btn-primary" id="btnSubmitAbs">Kirim Abstrak</button>';
-            html += '</form></div></div>';
+            html += '<div class="mb-3"><label>Judul Paper</label><input type="text" id="absTitle" class="form-control" required></div>';
+            html += '<div class="mb-3"><label class="form-label">Upload File Abstrak (PDF/DOC) Maks 5MB</label><input type="file" id="absFile" class="form-control" accept=".pdf,.doc,.docx" required></div>';
+            html += '<button type="submit" class="btn btn-primary" id="btnSubmitAbs"><i class="fa-solid fa-upload me-2"></i> Kirim File Abstrak</button>';
+            html += '</form></div></div>';
           }
         } else if (currentUser.role === 'Admin') {
           html += '<div class="card"><div class="card-header">Data Abstrak Masuk</div>';
@@ -757,28 +757,43 @@
         document.getElementById('abstractContainer').innerHTML = html;
       }
 
-      window.submitAbstract = function() {
-        var btn = document.getElementById('btnSubmitAbs');
-        btn.disabled = true; btn.innerHTML = 'Mengirim...';
-        var payload = {
-          title: document.getElementById('absTitle').value,
-          topic: '',
-          text: document.getElementById('absText').value
-        };
-        gasRun('submitAbstract', sessionToken, payload).then(function(res){
-          if(handleSessionExpired(res)) return;
-          if(res.success) {
-            Swal.fire({icon:'success', title:'Abstrak Terkirim', toast:true, position:'top-end', showConfirmButton:false, timer:1500});
-            window.loadPageData('abstract');
-          } else {
-            btn.disabled = false; btn.innerHTML = 'Kirim Abstrak';
-            Swal.fire('Error', res.message, 'error');
-          }
-        }).catch(function(err){
-          btn.disabled = false; btn.innerHTML = 'Kirim Abstrak';
-          Swal.fire('Error', err.message, 'error');
-        });
-      };
+      window.submitAbstract = async function() {
+        var fileInput = document.getElementById('absFile');
+        if (!fileInput.files || fileInput.files.length === 0) return Swal.fire('Error', 'Pilih file terlebih dahulu', 'warning');
+        var file = fileInput.files[0];
+        if (file.size > 5 * 1024 * 1024) return Swal.fire('Error', 'Ukuran file maksimal 5MB', 'error');
+
+        var btn = document.getElementById('btnSubmitAbs');
+        btn.disabled = true; btn.innerHTML = 'Mengupload...';
+
+        try {
+          var base64 = await getBase64(file);
+          var payload = { 
+            title: document.getElementById('absTitle').value,
+            topic: '',
+            filename: file.name, 
+            mimeType: file.type, 
+            base64Data: base64.split(',')[1] 
+          };
+
+          gasRun('submitAbstract', sessionToken, payload).then(function(res){
+            if(handleSessionExpired(res)) return;
+            if(res.success) {
+              Swal.fire({icon:'success', title:'Abstrak Terkirim', toast:true, position:'top-end', showConfirmButton:false, timer:1500});
+              window.loadPageData('abstract');
+            } else {
+              btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-upload me-2"></i> Kirim File Abstrak';
+              Swal.fire('Error', res.message, 'error');
+            }
+          }).catch(function(err){
+            btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-upload me-2"></i> Kirim File Abstrak';
+            Swal.fire('Error', err.message, 'error');
+          });
+        } catch(e) {
+          btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-upload me-2"></i> Kirim File Abstrak';
+          Swal.fire('Error', 'Gagal memproses file', 'error');
+        }
+      };
 
       // PAYMENT
       function renderPayment() {
