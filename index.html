@@ -681,7 +681,7 @@
           } else {
             html += '<div class="card"><div class="card-header bg-primary text-white">Form Registrasi Seminar</div><div class="card-body">';
             html += '<form onsubmit="event.preventDefault(); submitRegistration();">';
-            html += '<div class="mb-3"><label>Nama Lengkap (Sesuai Sertifikat)</label><input type="text" id="regFormName" class="form-control" value="'+escapeHTML(currentUser.fullname)+'" required></div>';
+            html += '<div class="mb-3"><label>Nama Lengkap beserta gelar (Untuk Sertifikat)</label><input type="text" id="regFormName" class="form-control" value="'+escapeHTML(currentUser.fullname)+'" required></div>';
             html += '<div class="mb-3"><label>Tipe Partisipasi</label><input type="text" class="form-control" value="'+escapeHTML(currentUser.role)+'" readonly></div>';
             html += '<button type="submit" class="btn btn-primary" id="btnSubmitReg">Submit Registrasi</button>';
             html += '</form></div></div>';
